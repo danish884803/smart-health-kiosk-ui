@@ -9,19 +9,23 @@ export async function POST(req) {
 
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
-  if (!token) return new Response("Unauthorized", { status: 401 });
+  if (!token) {
+    return new Response("Unauthorized", { status: 401 });
+  }
 
   const { id } = verifyToken(token);
   const data = await req.json();
 
   const bmiData = calculateBMI(data.height, data.weight);
 
-  await HealthRecord.create({
+  // ✅ CREATE RECORD
+  const record = await HealthRecord.create({
     userId: id,
     ...data,
     bmi: bmiData.bmi,
     bmiStatus: bmiData.status,
   });
 
-  return Response.json({ success: true });
+  // ✅ RETURN FULL RECORD (IMPORTANT)
+  return Response.json(record);
 }

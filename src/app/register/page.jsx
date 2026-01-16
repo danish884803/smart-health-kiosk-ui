@@ -1,36 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
 
 export default function RegisterPage() {
-  const { user, loading } = useAuth();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Redirect if already logged in
-  useEffect(() => {
-    if (!loading && user) {
-      router.replace("/dashboard");
-    }
-  }, [user, loading, router]);
+async function handleSubmit(e) {
+  e.preventDefault();
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  const res = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ email, password }),
+  });
 
-    await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    router.push("/login");
+  if (res.ok) {
+    router.replace("/dashboard");
   }
+}
 
-  if (loading) return null;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#eef6f9] to-[#ffffff]">
@@ -47,8 +40,7 @@ export default function RegisterPage() {
           <div>
             <label className="text-sm text-gray-600">Email</label>
             <input
-              className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f769e]"
-              placeholder="your@email.com"
+              className="w-full mt-1 px-4 py-2 border rounded-lg"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
@@ -59,26 +51,22 @@ export default function RegisterPage() {
             <label className="text-sm text-gray-600">Password</label>
             <input
               type="password"
-              className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f769e]"
-              placeholder="••••••••"
+              className="w-full mt-1 px-4 py-2 border rounded-lg"
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-[#0f769e] hover:bg-[#0c6787] text-white py-2.5 rounded-lg font-medium transition"
-          >
+          <button className="w-full bg-[#0f769e] text-white py-2.5 rounded-lg">
             Sign Up
           </button>
 
-          <p className="text-sm text-center text-gray-500 mt-4">
+          <p className="text-sm text-center mt-4">
             Already have an account?{" "}
             <button
               type="button"
-              onClick={() => router.push("/login")}
+              onClick={() => router.push("/")}
               className="text-[#0f769e] font-medium"
             >
               Sign In

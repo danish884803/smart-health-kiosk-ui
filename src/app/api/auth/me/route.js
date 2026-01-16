@@ -2,14 +2,16 @@ import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
 
 export async function GET() {
-  const cookieStore = await cookies();   // ✅ FIX
+  const cookieStore = await cookies(); // ✅ await REQUIRED
   const token = cookieStore.get("token")?.value;
 
   if (!token) {
-    return new Response(null, { status: 401 });
+    return new Response("Unauthorized", { status: 401 });
   }
 
-  const data = verifyToken(token);
+  const user = verifyToken(token);
 
-  return Response.json({ userId: data.id });
+  return Response.json({
+    email: user.email, // ⭐ MUST EXIST
+  });
 }
